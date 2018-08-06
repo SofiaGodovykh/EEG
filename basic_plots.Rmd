@@ -1,0 +1,206 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+From lots of studies it seems that in order to capture deep meditation we need to:
+Do FFT (furrier transform) and check power of alfa (8-12 Hz) and theta (4-8Hz). They should increase as the meditation is deeper. especially in midline areas (electrodes in the middle of the forehead and middle of the scalp) and frontal areas (forehead).
+ If we can check also coherence then it seems that for deeper meditation we should see higher coherence in alfa and theta in the midline and frontal areas.
+Maybe also we'll see increase of activity in the right hemisphere. We need to try and check it before BM.
+
+Coherence means to check correlation between waves. How similar are they along time. In our case they measure in the studies coherence of alpha waves from different electrodes, and coherence of theta waves from different electrodes.
+They found that the coherence of alpha and the coherence of theta grew as the meditation was deeper (means that alpha waves from different electrodes were more similar to each other as the meditation was deeper and same for theta waves).
+in the last Burning man, the most beautiful installation did just that!
+they measured heart bits of 6 people at once and checked their coherence and presented that with music and LED's. As the coherence increased the music and the LED's were increased as well. It was incredible!
+
+---------------------------
+
+
+```{r}
+eeg <- read.csv('Muse-B1C1_2018-06-20--07-42-37_1529495275603.csv')
+library(tidyr)
+library(ggplot2)
+```
+
+```{r}
+without_na = eeg[!is.na(eeg$theta_absolute_1),]
+ggplot(aes(y=theta_absolute_1, na.rm=TRUE, x = timestamps), 
+       data = without_na) + geom_line() + geom_smooth(color="red", span = 0.01) 
+```
+
+```{r}
+without_na = eeg[!is.na(eeg$theta_absolute_1),]
+without_na = without_na[!is.na(without_na$theta_absolute_2),]
+without_na = without_na[!is.na(without_na$theta_absolute_3),]
+without_na = without_na[!is.na(without_na$theta_absolute_4),]
+ggplot() + geom_line(aes(y=theta_absolute_1, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[4]) + geom_smooth(aes(y=theta_absolute_1, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[4], span = 0.01) +
+ geom_line(aes(y=theta_absolute_2, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[3]) + geom_smooth(aes(y=theta_absolute_2, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[3], span = 0.01) +
+geom_line(aes(y=theta_absolute_3, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[2]) + geom_smooth(aes(y=theta_absolute_3, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[2], span = 0.01) +
+  geom_line(aes(y=theta_absolute_4, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[1]) + geom_smooth(aes(y=theta_absolute_4, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[1], span = 0.01) +
+  labs(y = "theta", title = "theta")
+```
+
+```{r}
+without_na = eeg[!is.na(eeg$alpha_absolute_1),]
+without_na = without_na[!is.na(without_na$alpha_absolute_2),]
+without_na = without_na[!is.na(without_na$alpha_absolute_3),]
+without_na = without_na[!is.na(without_na$alpha_absolute_4),]
+ggplot() + geom_line(aes(y=alpha_absolute_1, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[4]) + geom_smooth(aes(y=alpha_absolute_1, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[4], span = 0.01) +
+ geom_line(aes(y=alpha_absolute_2, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[3]) + geom_smooth(aes(y=alpha_absolute_2, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[3], span = 0.01) +
+geom_line(aes(y=alpha_absolute_3, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[2]) + geom_smooth(aes(y=alpha_absolute_3, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[2], span = 0.01) +
+  geom_line(aes(y=alpha_absolute_4, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[1]) + geom_smooth(aes(y=alpha_absolute_4, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[1], span = 0.01) +
+  labs(y = "alpha", title = "alpha")
+```
+
+```{r}
+without_na = eeg[!is.na(eeg$delta_absolute_1),]
+without_na = without_na[!is.na(without_na$delta_absolute_2),]
+without_na = without_na[!is.na(without_na$delta_absolute_3),]
+without_na = without_na[!is.na(without_na$delta_absolute_4),]
+ggplot() + geom_line(aes(y=delta_absolute_1, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[4]) + geom_smooth(aes(y=delta_absolute_1, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[4], span = 0.01) +
+ geom_line(aes(y=delta_absolute_2, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[3]) + geom_smooth(aes(y=delta_absolute_2, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[3], span = 0.01) +
+geom_line(aes(y=delta_absolute_3, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[2]) + geom_smooth(aes(y=delta_absolute_3, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[2], span = 0.01) +
+  geom_line(aes(y=delta_absolute_4, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[1]) + geom_smooth(aes(y=delta_absolute_4, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[1], span = 0.01) +
+  labs(y = "delta", title = "delta")
+```
+
+```{r}
+without_na = eeg[!is.na(eeg$gamma_absolute_1),]
+without_na = without_na[!is.na(without_na$gamma_absolute_2),]
+without_na = without_na[!is.na(without_na$gamma_absolute_3),]
+without_na = without_na[!is.na(without_na$gamma_absolute_4),]
+ggplot() + geom_line(aes(y=gamma_absolute_1, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[4]) + geom_smooth(aes(y=gamma_absolute_1, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[4], span = 0.01) +
+ geom_line(aes(y=gamma_absolute_2, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[3]) + geom_smooth(aes(y=gamma_absolute_2, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[3], span = 0.01) +
+geom_line(aes(y=gamma_absolute_3, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[2]) + geom_smooth(aes(y=gamma_absolute_3, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[2], span = 0.01) +
+  geom_line(aes(y=gamma_absolute_4, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[1]) + geom_smooth(aes(y=gamma_absolute_4, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[1], span = 0.01) +
+   labs(y = "gamma", title = "gamma")
+```
+
+```{r}
+without_na = eeg[!is.na(eeg$beta_absolute_1),]
+without_na = without_na[!is.na(without_na$beta_absolute_2),]
+without_na = without_na[!is.na(without_na$beta_absolute_3),]
+without_na = without_na[!is.na(without_na$beta_absolute_4),]
+ggplot() + geom_line(aes(y=beta_absolute_1, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[4]) + geom_smooth(aes(y=beta_absolute_1, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[4], span = 0.01) +
+ geom_line(aes(y=beta_absolute_2, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[3]) + geom_smooth(aes(y=beta_absolute_2, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[3], span = 0.01) +
+geom_line(aes(y=beta_absolute_3, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[2]) + geom_smooth(aes(y=beta_absolute_3, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[2], span = 0.01) +
+  geom_line(aes(y=beta_absolute_4, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[1]) + geom_smooth(aes(y=beta_absolute_4, x = timestamps), 
+       data = without_na, color=brewer.pal(4, "Blues")[1], span = 0.01) +
+   labs(y = "beta", title = "beta")
+```
+
+```{r}
+ggplot() + geom_line(aes(y=alpha_absolute_1, x = timestamps), 
+       data = eeg[!is.na(eeg$alpha_absolute_1),], color=brewer.pal(5, "Blues")[5], alpha = 0.5) + geom_smooth(aes(y=alpha_absolute_1, x = timestamps), 
+       data = eeg[!is.na(eeg$alpha_absolute_1),], color=brewer.pal(5, "Blues")[5], span = 0.01) +
+geom_line(aes(y=beta_absolute_1, x = timestamps), 
+       data = eeg[!is.na(eeg$beta_absolute_1),], color=brewer.pal(5, "Blues")[4], alpha = 0.5) + geom_smooth(aes(y=beta_absolute_1, x = timestamps), 
+       data = eeg[!is.na(eeg$beta_absolute_1),], color=brewer.pal(5, "Blues")[4], span = 0.01) +
+geom_line(aes(y=gamma_absolute_1, x = timestamps), 
+       data = eeg[!is.na(eeg$gamma_absolute_1),], color=brewer.pal(5, "Blues")[3], alpha = 0.5) + geom_smooth(aes(y=gamma_absolute_1, x = timestamps), 
+       data = eeg[!is.na(eeg$gamma_absolute_1),], color=brewer.pal(5, "Blues")[3], span = 0.01) +
+geom_line(aes(y=delta_absolute_1, x = timestamps), 
+       data = eeg[!is.na(eeg$delta_absolute_1),], color=brewer.pal(5, "Blues")[2], alpha = 0.5) + geom_smooth(aes(y=delta_absolute_1, x = timestamps), 
+       data = eeg[!is.na(eeg$delta_absolute_1),], color=brewer.pal(5, "Blues")[2], span = 0.01) +
+geom_line(aes(y=theta_absolute_1, x = timestamps), 
+       data = eeg[!is.na(eeg$theta_absolute_1),], color=brewer.pal(5, "Blues")[1], alpha = 0.5) + geom_smooth(aes(y=theta_absolute_1, x = timestamps), 
+       data = eeg[!is.na(eeg$theta_absolute_1),], color=brewer.pal(5, "Blues")[1], span = 0.01)
+```
+
+```{r}
+ggplot() + geom_line(aes(y=alpha_absolute_2, x = timestamps), 
+       data = eeg[!is.na(eeg$alpha_absolute_2),], color=brewer.pal(5, "Blues")[5], alpha = 0.5) + geom_smooth(aes(y=alpha_absolute_2, x = timestamps), 
+       data = eeg[!is.na(eeg$alpha_absolute_2),], color=brewer.pal(5, "Blues")[5], span = 0.01) +
+geom_line(aes(y=beta_absolute_2, x = timestamps), 
+       data = eeg[!is.na(eeg$beta_absolute_2),], color=brewer.pal(5, "Blues")[4], alpha = 0.5) + geom_smooth(aes(y=beta_absolute_2, x = timestamps), 
+       data = eeg[!is.na(eeg$beta_absolute_2),], color=brewer.pal(5, "Blues")[4], span = 0.01) +
+geom_line(aes(y=gamma_absolute_2, x = timestamps), 
+       data = eeg[!is.na(eeg$gamma_absolute_2),], color=brewer.pal(5, "Blues")[3], alpha = 0.5) + geom_smooth(aes(y=gamma_absolute_2, x = timestamps), 
+       data = eeg[!is.na(eeg$gamma_absolute_2),], color=brewer.pal(5, "Blues")[3], span = 0.01) +
+geom_line(aes(y=delta_absolute_2, x = timestamps), 
+       data = eeg[!is.na(eeg$delta_absolute_2),], color=brewer.pal(5, "Blues")[2], alpha = 0.5) + geom_smooth(aes(y=delta_absolute_2, x = timestamps), 
+       data = eeg[!is.na(eeg$delta_absolute_2),], color=brewer.pal(5, "Blues")[2], span = 0.01) +
+geom_line(aes(y=theta_absolute_2, x = timestamps), 
+       data = eeg[!is.na(eeg$theta_absolute_2),], color=brewer.pal(5, "Blues")[1], alpha = 0.5) + geom_smooth(aes(y=theta_absolute_2, x = timestamps), 
+       data = eeg[!is.na(eeg$theta_absolute_2),], color=brewer.pal(5, "Blues")[1], span = 0.01)
+```
+
+```{r}
+ggplot() + geom_line(aes(y=alpha_absolute_3, x = timestamps), 
+       data = eeg[!is.na(eeg$alpha_absolute_3),], color=brewer.pal(5, "Blues")[5], alpha = 0.5) + geom_smooth(aes(y=alpha_absolute_3, x = timestamps), 
+       data = eeg[!is.na(eeg$alpha_absolute_3),], color=brewer.pal(5, "Blues")[5], span = 0.01) +
+geom_line(aes(y=beta_absolute_3, x = timestamps), 
+       data = eeg[!is.na(eeg$beta_absolute_3),], color=brewer.pal(5, "Blues")[4], alpha = 0.5) + geom_smooth(aes(y=beta_absolute_3, x = timestamps), 
+       data = eeg[!is.na(eeg$beta_absolute_3),], color=brewer.pal(5, "Blues")[4], span = 0.01) +
+geom_line(aes(y=gamma_absolute_3, x = timestamps), 
+       data = eeg[!is.na(eeg$gamma_absolute_3),], color=brewer.pal(5, "Blues")[3], alpha = 0.5) + geom_smooth(aes(y=gamma_absolute_3, x = timestamps), 
+       data = eeg[!is.na(eeg$gamma_absolute_3),], color=brewer.pal(5, "Blues")[3], span = 0.01) +
+geom_line(aes(y=delta_absolute_3, x = timestamps), 
+       data = eeg[!is.na(eeg$delta_absolute_3),], color=brewer.pal(5, "Blues")[2], alpha = 0.5) + geom_smooth(aes(y=delta_absolute_3, x = timestamps), 
+       data = eeg[!is.na(eeg$delta_absolute_3),], color=brewer.pal(5, "Blues")[2], span = 0.01) +
+geom_line(aes(y=theta_absolute_3, x = timestamps), 
+       data = eeg[!is.na(eeg$theta_absolute_3),], color=brewer.pal(5, "Blues")[1], alpha = 0.5) + geom_smooth(aes(y=theta_absolute_3, x = timestamps), 
+       data = eeg[!is.na(eeg$theta_absolute_3),], color=brewer.pal(5, "Blues")[1], span = 0.01)
+```
+
+```{r}
+ggplot() + geom_line(aes(y=alpha_absolute_4, x = timestamps), 
+       data = eeg[!is.na(eeg$alpha_absolute_4),], color=brewer.pal(5, "Blues")[5], alpha = 0.5) + geom_smooth(aes(y=alpha_absolute_4, x = timestamps), 
+       data = eeg[!is.na(eeg$alpha_absolute_4),], color=brewer.pal(5, "Blues")[5], span = 0.01) +
+geom_line(aes(y=beta_absolute_4, x = timestamps), 
+       data = eeg[!is.na(eeg$beta_absolute_4),], color=brewer.pal(5, "Blues")[4], alpha = 0.5) + geom_smooth(aes(y=beta_absolute_4, x = timestamps), 
+       data = eeg[!is.na(eeg$beta_absolute_4),], color=brewer.pal(5, "Blues")[4], span = 0.01) +
+geom_line(aes(y=gamma_absolute_4, x = timestamps), 
+       data = eeg[!is.na(eeg$gamma_absolute_4),], color=brewer.pal(5, "Blues")[3], alpha = 0.5) + geom_smooth(aes(y=gamma_absolute_4, x = timestamps), 
+       data = eeg[!is.na(eeg$gamma_absolute_4),], color=brewer.pal(5, "Blues")[3], span = 0.01) +
+geom_line(aes(y=delta_absolute_4, x = timestamps), 
+       data = eeg[!is.na(eeg$delta_absolute_4),], color=brewer.pal(5, "Blues")[2], alpha = 0.5) + geom_smooth(aes(y=delta_absolute_4, x = timestamps), 
+       data = eeg[!is.na(eeg$delta_absolute_4),], color=brewer.pal(5, "Blues")[2], span = 0.01) +
+geom_line(aes(y=theta_absolute_4, x = timestamps), 
+       data = eeg[!is.na(eeg$theta_absolute_4),], color=brewer.pal(5, "Blues")[1], alpha = 0.5) + geom_smooth(aes(y=theta_absolute_4, x = timestamps), 
+       data = eeg[!is.na(eeg$theta_absolute_4),], color=brewer.pal(5, "Blues")[1], span = 0.01)
+```
+
+```{r}
+temp <- print(length(eeg[!is.na(eeg$blink), ]))
+```
+

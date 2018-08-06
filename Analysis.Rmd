@@ -1,0 +1,12 @@
+---
+title: "EEG analysis"
+output: html_notebook
+---
+
+```{r}
+#eeg <- read.csv('/Users/sofiagodovykh/EEG/cleared_eeg/med1_eeg.csv')
+eeg <- read.csv('cleared_eeg/med1_eeg.csv')
+library(tidyr)
+library(ggplot2)
+```
+
