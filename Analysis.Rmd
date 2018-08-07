@@ -3,10 +3,49 @@ title: "EEG analysis"
 output: html_notebook
 ---
 
+imports
 ```{r}
-#eeg <- read.csv('/Users/sofiagodovykh/EEG/cleared_eeg/med1_eeg.csv')
-eeg <- read.csv('cleared_eeg/med1_eeg.csv')
 library(tidyr)
 library(ggplot2)
+library(RColorBrewer)
 ```
+
+load data
+```{r}
+inexp_meditation_files = sort(list.files("ffted/",pattern="^0_ffted_med"))
+inexp_reference_files = sort(list.files("ffted/",pattern="^0_ffted_ref"))
+exp_meditation_files = sort(list.files("ffted/",pattern="^1_ffted_med"))
+exp_reference_files = sort(list.files("ffted/",pattern="^1_ffted_ref"))
+
+
+exp_meditation = list()
+for(i in 1:length(exp_meditation_files)) {
+  file = exp_meditation_files[i]
+  exp_meditation[[i]] <-  read.csv(paste("ffted/", file, sep=""))
+}
+
+inexp_meditation = list()
+for(i in 1:length(inexp_meditation_files)) {
+  file = inexp_meditation_files[i]
+  inexp_meditation[[i]] <-  read.csv(paste("ffted/", file, sep=""))
+}
+
+exp_reference = list()
+for(i in 1:length(exp_reference_files)) {
+  file = exp_reference_files[i]
+  exp_reference[[i]] <-  read.csv(paste("ffted/", file, sep=""))
+}
+
+inexp_reference = list()
+for(i in 1:length(inexp_reference_files)) {
+  file = inexp_reference_files[i]
+  inexp_reference[[i]] <-  read.csv(paste("ffted/", file, sep=""))
+}
+```
+
+```{r}
+ggplot() + geom_line(aes(y=alpha_absolute_1, x = timestamps), data = inexp_reference[[1]]) + 
+  geom_line(aes(y=alpha_absolute_2, x = timestamps), data = inexp_reference[[1]])
+```
+
 
