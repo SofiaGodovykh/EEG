@@ -162,3 +162,13 @@ temp <- rbind(delta_exp_med, delta_inexp_med)
 ggplot(temp, aes(value, fill = exp)) + 
   geom_histogram(alpha = 0.5, bins = 100, position = 'identity')
 ```
+
+```{r}
+alpha_exp_med<-alpha_exp_med[!(alpha_exp_med$value=="-Inf"),]
+alpha_inexp_med<-alpha_inexp_med[!(alpha_inexp_med$value=="-Inf"),]
+t.test(na.omit(alpha_exp_med$value), na.omit(alpha_inexp_med$value))
+```
+
+TODO:
+remove -Inf
+add functions for repeating code
