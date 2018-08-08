@@ -85,9 +85,17 @@ subset_and_melt <- function(med, exp, wave, electrodes, melt){
 }
 ```
 
-
+testing
 ```{r}
 temp_2 <- subset_and_melt(FALSE, TRUE, "beta", "None", TRUE)
 ggplot(temp_2[[1]], aes(timestamps,value)) + geom_line(aes(colour = waves))
 ```
 
+things to think about:
+* extreme points, spikes, etc
+* different smoothing rate
+* difference between meditative and regular state
+* difference between experienced meditators and newbies
+* how to determine the levels and scale it for others
+* what happens when meditation is stable
+* explore the coherence between alpha and theta waves
