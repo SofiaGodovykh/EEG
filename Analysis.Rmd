@@ -6,6 +6,8 @@ output: html_notebook
 imports
 ```{r}
 library(tidyr)
+library(purrr)
+library(dplyr)
 library(ggplot2)
 library(RColorBrewer)
 library(reshape2)
@@ -47,15 +49,7 @@ for(i in 1:length(inexp_reference_files)) {
 
 subsetting data
 ```{r}
-#df <- data.frame(time = exp_meditation[[1]]$timestamps,
-#                 alpha_1 = exp_meditation[[1]]$alpha_absolute_1,
-#                 alpha_2 = exp_meditation[[1]]$alpha_absolute_2)
-                 
-                
-#df <- melt(df, id.vars = 'time', variable.name = 'waves')
-#ggplot(df, aes(time,value)) + geom_line(aes(colour = waves))
-
-subset_and_melt <- function(med, exp, wave, electrodes, melt){
+subset_and_melt <- function(med, exp, wave, electrodes, melt, melt_all){
   if(med){
     if(exp){
       df <- exp_meditation
@@ -81,14 +75,17 @@ subset_and_melt <- function(med, exp, wave, electrodes, melt){
     data[[i]] <- melt(data[[i]], id.vars = 'timestamps', variable.name = 'waves')
   }
   }
+  if(melt_all){
+    data <- melt(data, id.vars = c('timestamps', 'waves', 'value'))
+  }
   return(data)
 }
 ```
 
 testing
 ```{r}
-temp_2 <- subset_and_melt(FALSE, TRUE, "beta", "None", TRUE)
-ggplot(temp_2[[1]], aes(timestamps,value)) + geom_line(aes(colour = waves))
+temp_2 <- subset_and_melt(FALSE, TRUE, "beta", "None", TRUE, TRUE)
+#ggplot(temp_2[[1]], aes(timestamps,value)) + geom_line(aes(colour = waves))
 ```
 
 things to think about:
@@ -99,3 +96,69 @@ things to think about:
 * how to determine the levels and scale it for others
 * what happens when meditation is stable
 * explore the coherence between alpha and theta waves
+
+
+explore experienced/inexperienced distributions of alpha wave
+```{r}
+alpha_exp_med = subset_and_melt(TRUE, TRUE, 'alpha', 'ALL', TRUE, TRUE)
+alpha_inexp_med = subset_and_melt(TRUE, FALSE, 'alpha', 'ALL', TRUE, TRUE)
+alpha_exp_med$exp <- "experienced"
+alpha_exp_med$exp <- as.factor(alpha_exp_med$exp)
+alpha_inexp_med$exp <- "inexperienced"
+alpha_inexp_med$exp <- as.factor(alpha_inexp_med$exp)
+temp <- rbind(alpha_exp_med, alpha_inexp_med)
+ggplot(temp, aes(value, fill = exp)) + 
+  geom_histogram(alpha = 0.5, bins = 100, position = 'identity')
+```
+
+explore experienced/inexperienced distributions of theta wave
+```{r}
+theta_exp_med = subset_and_melt(TRUE, TRUE, 'theta', 'ALL', TRUE, TRUE)
+theta_inexp_med = subset_and_melt(TRUE, FALSE, 'theta', 'ALL', TRUE, TRUE)
+theta_exp_med$exp <- "experienced"
+theta_exp_med$exp <- as.factor(theta_exp_med$exp)
+theta_inexp_med$exp <- "inexperienced"
+theta_inexp_med$exp <- as.factor(theta_inexp_med$exp)
+temp <- rbind(theta_exp_med, theta_inexp_med)
+ggplot(temp, aes(value, fill = exp)) + 
+  geom_histogram(alpha = 0.5, bins = 100, position = 'identity')
+```
+
+explore experienced/inexperienced distributions of beta wave
+```{r}
+beta_exp_med = subset_and_melt(TRUE, TRUE, 'beta', 'ALL', TRUE, TRUE)
+beta_inexp_med = subset_and_melt(TRUE, FALSE, 'beta', 'ALL', TRUE, TRUE)
+beta_exp_med$exp <- "experienced"
+beta_exp_med$exp <- as.factor(beta_exp_med$exp)
+beta_inexp_med$exp <- "inexperienced"
+beta_inexp_med$exp <- as.factor(beta_inexp_med$exp)
+temp <- rbind(beta_exp_med, beta_inexp_med)
+ggplot(temp, aes(value, fill = exp)) + 
+  geom_histogram(alpha = 0.5, bins = 100, position = 'identity')
+```
+
+explore experienced/inexperienced distributions of gamma wave
+```{r}
+gamma_exp_med = subset_and_melt(TRUE, TRUE, 'gamma', 'ALL', TRUE, TRUE)
+gamma_inexp_med = subset_and_melt(TRUE, FALSE, 'gamma', 'ALL', TRUE, TRUE)
+gamma_exp_med$exp <- "experienced"
+gamma_exp_med$exp <- as.factor(gamma_exp_med$exp)
+gamma_inexp_med$exp <- "inexperienced"
+gamma_inexp_med$exp <- as.factor(gamma_inexp_med$exp)
+temp <- rbind(gamma_exp_med, gamma_inexp_med)
+ggplot(temp, aes(value, fill = exp)) + 
+  geom_histogram(alpha = 0.5, bins = 100, position = 'identity')
+```
+
+explore experienced/inexperienced distributions of delta wave
+```{r}
+delta_exp_med = subset_and_melt(TRUE, TRUE, 'delta', 'ALL', TRUE, TRUE)
+delta_inexp_med = subset_and_melt(TRUE, FALSE, 'delta', 'ALL', TRUE, TRUE)
+delta_exp_med$exp <- "experienced"
+delta_exp_med$exp <- as.factor(delta_exp_med$exp)
+delta_inexp_med$exp <- "inexperienced"
+delta_inexp_med$exp <- as.factor(delta_inexp_med$exp)
+temp <- rbind(delta_exp_med, delta_inexp_med)
+ggplot(temp, aes(value, fill = exp)) + 
+  geom_histogram(alpha = 0.5, bins = 100, position = 'identity')
+```
