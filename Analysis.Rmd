@@ -8,6 +8,7 @@ imports
 library(tidyr)
 library(ggplot2)
 library(RColorBrewer)
+library(reshape2)
 ```
 
 load data
@@ -43,9 +44,42 @@ for(i in 1:length(inexp_reference_files)) {
 }
 ```
 
+
+subsetting data
 ```{r}
-ggplot() + geom_line(aes(y=alpha_absolute_1, x = timestamps), data = inexp_reference[[1]]) + 
-  geom_line(aes(y=alpha_absolute_2, x = timestamps), data = inexp_reference[[1]])
+#df <- data.frame(time = exp_meditation[[1]]$timestamps,
+#                 alpha_1 = exp_meditation[[1]]$alpha_absolute_1,
+#                 alpha_2 = exp_meditation[[1]]$alpha_absolute_2)
+                 
+                
+#df <- melt(df, id.vars = 'time', variable.name = 'waves')
+#ggplot(df, aes(time,value)) + geom_line(aes(colour = waves))
+
+myfunction <- function(med, exp, wave, electrodes){
+  browser()
+  if(med){
+    if(exp){
+      df <- exp_meditation
+    }
+    else{
+      df <- inexp_meditation
+    }
+  }
+  else{
+    if(exp){
+      df <- exp_reference
+    }
+    else{
+      df <- inexp_reference
+    }
+  }
+
+  data = list()
+  for(i in 1:length(df)) {
+  data[[i]] <- df[[i]][, grepl(paste('(', wave, ')|(', electrodes, ')|(timestamp)', sep = ""), names(df[[i]]))]
+  }
+  return(data)
+}
 ```
 
 
