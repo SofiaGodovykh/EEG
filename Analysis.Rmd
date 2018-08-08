@@ -55,8 +55,7 @@ subsetting data
 #df <- melt(df, id.vars = 'time', variable.name = 'waves')
 #ggplot(df, aes(time,value)) + geom_line(aes(colour = waves))
 
-myfunction <- function(med, exp, wave, electrodes){
-  browser()
+subset_and_melt <- function(med, exp, wave, electrodes, melt){
   if(med){
     if(exp){
       df <- exp_meditation
@@ -77,9 +76,18 @@ myfunction <- function(med, exp, wave, electrodes){
   data = list()
   for(i in 1:length(df)) {
   data[[i]] <- df[[i]][, grepl(paste('(', wave, ')|(', electrodes, ')|(timestamp)', sep = ""), names(df[[i]]))]
+  if(melt){
+    #df <- melt(df, id.vars = 'time', variable.name = 'waves')
+    data[[i]] <- melt(data[[i]], id.vars = 'timestamps', variable.name = 'waves')
+  }
   }
   return(data)
 }
 ```
 
+
+```{r}
+temp_2 <- subset_and_melt(FALSE, TRUE, "beta", "None", TRUE)
+ggplot(temp_2[[1]], aes(timestamps,value)) + geom_line(aes(colour = waves))
+```
 
