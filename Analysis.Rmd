@@ -51,6 +51,15 @@ for(i in 1:length(inexp_reference_files)) {
 ```
 
 
+convert time from absolute to relative
+```{r}
+convert_time <- function(timestamps){
+  time <- timestamps - min(timestamps)
+  return(time)
+}
+```
+
+
 subsetting data
 ```{r}
 subset_and_melt <- function(med, exp, wave, electrodes, melt, melt_all){
@@ -71,9 +80,11 @@ subset_and_melt <- function(med, exp, wave, electrodes, melt, melt_all){
     }
   }
 
+  #browser()
   data = list()
   for(i in 1:length(df)) {
   data[[i]] <- df[[i]][, grepl(paste('(', wave, ')|(', electrodes, ')|(timestamp)', sep = ""), names(df[[i]]))]
+  data[[i]]$timestamps <- convert_time(data[[i]]$timestamps)
   if(melt){
     data[[i]] <- melt(data[[i]], id.vars = 'timestamps', variable.name = 'waves')
     data[[i]]$waves <- as.factor(data[[i]]$waves)
@@ -289,8 +300,14 @@ data_temp <- subset_and_melt(TRUE, TRUE, 'alpha', "ALL", TRUE, TRUE)
 #data_temp$waves == "alpha_absolute_1", 
 
 #data_temp <- data_temp[data_temp$L1 == 1,]
-ggplot(aes(y = value, x = timestamps), data = data_temp, data_temp$waves == "alpha_absolute_1" & data_temp$L1 ==  1) +
-  geom_line()
+ggplot(aes(y = value, x = timestamps), data = data_temp, data_temp$waves == "alpha_absolute_1", data_temp$L1 ==  1) +
+  geom_line() +
+  stat_smooth(n = 5)
 ```
 
+```{r}
+my.spline <- smooth.spline(data_temp$timestamps, data_temp$value, df = 15)
+plot(data_temp$timestamps, data_temp$value, type = "n")
+lines(my.spline$x, my.spline$y, lwd = 2.5, col = "blue")
+```
 
