@@ -75,13 +75,15 @@ subset_and_melt <- function(med, exp, wave, electrodes, melt, melt_all){
   for(i in 1:length(df)) {
   data[[i]] <- df[[i]][, grepl(paste('(', wave, ')|(', electrodes, ')|(timestamp)', sep = ""), names(df[[i]]))]
   if(melt){
-    #df <- melt(df, id.vars = 'time', variable.name = 'waves')
     data[[i]] <- melt(data[[i]], id.vars = 'timestamps', variable.name = 'waves')
+    data[[i]]$waves <- as.factor(data[[i]]$waves)
   }
   }
   if(melt_all){
     data <- melt(data, id.vars = c('timestamps', 'waves', 'value'))
+    data$L1 <- as.factor(data$L1)
   }
+  
   return(data)
 }
 ```
@@ -269,4 +271,26 @@ a <- t_test_max("gamma", TRUE)
 a <- t_test_max("beta", TRUE)
 a <- t_test_max("delta", TRUE)
 ```
+```{r}
+#ggplot(temp, aes(value, fill = exp)) + 
+#  geom_histogram(alpha = 0.5, bins = 100, position = 'identity')
+
+data_temp <- subset_and_melt(TRUE, TRUE, 'alpha', "ALL", TRUE, TRUE)
+
+#geom_line(aes(y=theta_absolute_2, x = timestamps), 
+#       data = without_na, color=brewer.pal(4, "Blues")[3]) + #geom_smooth(aes(y=theta_absolute_2, x = timestamps), 
+#       data = without_na, color=brewer.pal(4, "Blues")[3], span = 0.01) +
+```
+
+```{r}
+
+#temps <- data_temp[data_temp$L1 == 1 & data_temp$waves == "alpha_absolute_1", ]
+# data_temp$L1 == 1,
+#data_temp$waves == "alpha_absolute_1", 
+
+#data_temp <- data_temp[data_temp$L1 == 1,]
+ggplot(aes(y = value, x = timestamps), data = data_temp, data_temp$waves == "alpha_absolute_1" & data_temp$L1 ==  1) +
+  geom_line()
+```
+
 
