@@ -213,7 +213,60 @@ a <- t_test("delta", TRUE)
 a <- t_test("theta", TRUE)
 ```
 
-```{r}
+There is no significant statistical difference in medians and means between experienced and
+inexperienced people
 
+```{r}
+t_test_min <- function(wave, med){
+  wave_exp <- subset_and_melt(med, TRUE, wave, "All", TRUE, FALSE)
+  medians_exp <- list()
+  for(i in 1:length(wave_exp)){
+    medians_exp[[i]] <- min(wave_exp[[i]]$value)
+  }
+  wave_inexp <- subset_and_melt(med, FALSE, wave, "All", TRUE, FALSE)
+  medians_inexp <- list()
+  for(i in 1:length(wave_inexp)){
+    medians_inexp[[i]] <- min(wave_inexp[[i]]$value)
+  }
+  
+  medians_exp <- unlist(medians_exp, use.names=FALSE)
+  medians_inexp <- unlist(medians_inexp, use.names=FALSE)
+  return(print(t.test(medians_exp, medians_inexp)))
+}
+```
+
+```{r}
+a <- t_test_min("alpha", TRUE)
+a <- t_test_min("theta", TRUE)
+a <- t_test_min("gamma", TRUE)
+a <- t_test_min("beta", TRUE)
+a <- t_test_min("delta", TRUE)
+```
+
+```{r}
+t_test_max <- function(wave, med){
+  wave_exp <- subset_and_melt(med, TRUE, wave, "All", TRUE, FALSE)
+  medians_exp <- list()
+  for(i in 1:length(wave_exp)){
+    medians_exp[[i]] <- max(wave_exp[[i]]$value)
+  }
+  wave_inexp <- subset_and_melt(med, FALSE, wave, "All", TRUE, FALSE)
+  medians_inexp <- list()
+  for(i in 1:length(wave_inexp)){
+    medians_inexp[[i]] <- max(wave_inexp[[i]]$value)
+  }
+  
+  medians_exp <- unlist(medians_exp, use.names=FALSE)
+  medians_inexp <- unlist(medians_inexp, use.names=FALSE)
+  return(print(t.test(medians_exp, medians_inexp)))
+}
+```
+
+```{r}
+a <- t_test_max("alpha", TRUE)
+a <- t_test_max("theta", TRUE)
+a <- t_test_max("gamma", TRUE)
+a <- t_test_max("beta", TRUE)
+a <- t_test_max("delta", TRUE)
 ```
 
