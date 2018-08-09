@@ -25,24 +25,28 @@ exp_meditation = list()
 for(i in 1:length(exp_meditation_files)) {
   file = exp_meditation_files[i]
   exp_meditation[[i]] <-  read.csv(paste("ffted/", file, sep=""))
+  exp_meditation[[i]] <- exp_meditation[[i]][rowSums(exp_meditation[[i]] == "-Inf") == 0, , drop = FALSE]
 }
 
 inexp_meditation = list()
 for(i in 1:length(inexp_meditation_files)) {
   file = inexp_meditation_files[i]
   inexp_meditation[[i]] <-  read.csv(paste("ffted/", file, sep=""))
+  inexp_meditation[[i]] <- inexp_meditation[[i]][rowSums(inexp_meditation[[i]] == "-Inf") == 0, , drop = FALSE]
 }
 
 exp_reference = list()
 for(i in 1:length(exp_reference_files)) {
   file = exp_reference_files[i]
   exp_reference[[i]] <-  read.csv(paste("ffted/", file, sep=""))
+  exp_reference[[i]] <- exp_reference[[i]][rowSums(exp_reference[[i]] == "-Inf") == 0, , drop = FALSE]
 }
 
 inexp_reference = list()
 for(i in 1:length(inexp_reference_files)) {
   file = inexp_reference_files[i]
   inexp_reference[[i]] <-  read.csv(paste("ffted/", file, sep=""))
+  inexp_reference[[i]] <- inexp_reference[[i]][rowSums(inexp_reference[[i]] == "-Inf") == 0, , drop = FALSE]
 }
 ```
 
@@ -164,11 +168,52 @@ ggplot(temp, aes(value, fill = exp)) +
 ```
 
 ```{r}
-alpha_exp_med<-alpha_exp_med[!(alpha_exp_med$value=="-Inf"),]
-alpha_inexp_med<-alpha_inexp_med[!(alpha_inexp_med$value=="-Inf"),]
-t.test(na.omit(alpha_exp_med$value), na.omit(alpha_inexp_med$value))
+t.test(na.omit(alpha_exp_med$value), na.omit(alpha_inexp_med$value), var.equal = TRUE)
 ```
 
-TODO:
-remove -Inf
-add functions for repeating code
+
+```{r}
+t_test <- function(wave, med){
+  wave_exp <- subset_and_melt(med, TRUE, wave, "All", TRUE, FALSE)
+  medians_exp <- list()
+  for(i in 1:length(wave_exp)){
+    medians_exp[[i]] <- median(wave_exp[[i]]$value)
+  }
+  wave_inexp <- subset_and_melt(med, FALSE, wave, "All", TRUE, FALSE)
+  medians_inexp <- list()
+  for(i in 1:length(wave_inexp)){
+    medians_inexp[[i]] <- median(wave_inexp[[i]]$value)
+  }
+  
+  medians_exp <- unlist(medians_exp, use.names=FALSE)
+  medians_inexp <- unlist(medians_inexp, use.names=FALSE)
+  return(print(t.test(medians_exp, medians_inexp)))
+}
+
+```
+
+
+```{r}
+t_test("alpha", TRUE)
+```
+
+```{r}
+a <- t_test("beta", TRUE)
+```
+
+```{r}
+a <- t_test("gamma", TRUE)
+```
+
+```{r}
+a <- t_test("delta", TRUE)
+```
+
+```{r}
+a <- t_test("theta", TRUE)
+```
+
+```{r}
+
+```
+
