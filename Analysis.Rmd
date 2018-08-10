@@ -17,6 +17,20 @@ require(greybox)
 require(Mcomp)
 ```
 
+
+```{r}
+add_loess <- function(df){
+  loess_df <- data.frame()
+  for(i in names(df)){
+    if(grepl('absolute', i)){
+      loess_df$paste("loess_", i) <- loess(value ~ timestamps, data=i, span=0.65)$fitted
+    }
+  }
+  df <- rbind(df, loess_df)
+  return(df)
+}
+```
+
 load data
 ```{r}
 inexp_meditation_files = sort(list.files("ffted/",pattern="^0_ffted_med"))
@@ -24,12 +38,12 @@ inexp_reference_files = sort(list.files("ffted/",pattern="^0_ffted_ref"))
 exp_meditation_files = sort(list.files("ffted/",pattern="^1_ffted_med"))
 exp_reference_files = sort(list.files("ffted/",pattern="^1_ffted_ref"))
 
-
 exp_meditation = list()
 for(i in 1:length(exp_meditation_files)) {
   file = exp_meditation_files[i]
-  exp_meditation[[i]] <-  read.csv(paste("ffted/", file, sep=""))
+  exp_meditation[[i]] <- read.csv(paste("ffted/", file, sep=""))
   exp_meditation[[i]] <- exp_meditation[[i]][rowSums(exp_meditation[[i]] == "-Inf") == 0, , drop = FALSE]
+  exp_meditation[[i]] <- add_loess(exp_meditation[[i]])
 }
 
 inexp_meditation = list()
@@ -339,5 +353,15 @@ ggplot() +
   geom_line(aes(y = value, x = timestamps), data = to_draw_part) +
   geom_smooth(aes(y = value, x = timestamps), data = to_draw_part, span = 1, n = 15, color = "blue") +
   geom_line(aes(y = loess, x = timestamps), data = to_draw_part, color = 'red')
+```
+
+
+```{r}
+
+}
+```
+
+```{r}
+test <- add_smooth("test_loess", theta_exp_med, 0.65, 'theta_absolute_1', "1")
 ```
 
