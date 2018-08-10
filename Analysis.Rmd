@@ -20,13 +20,17 @@ require(Mcomp)
 
 ```{r}
 add_loess <- function(df){
-  loess_df <- data.frame()
+  loess_df <- data.frame(df$timestamps)
   for(i in names(df)){
-    if(grepl('absolute', i)){
-      loess_df$paste("loess_", i) <- loess(value ~ timestamps, data=i, span=0.65)$fitted
+    if(grepl('absolute', i) & !grepl('loess', i)){
+      name <- paste("loess_", i, sep = "")
+      print(name)
+      df[, name] <- loess(df[,i] ~ df$timestamps, data = df, span=0.65)$fitted
+      #loess(value ~ timestamps, data=i, span=0.65)$fitted
+      #loess_df$paste("loess_", i) <- loess(value ~ timestamps, data=i, span=0.65)$fitted
     }
   }
-  df <- rbind(df, loess_df)
+  #df <- merge(df, loess_df)
   return(df)
 }
 ```
@@ -44,6 +48,7 @@ for(i in 1:length(exp_meditation_files)) {
   exp_meditation[[i]] <- read.csv(paste("ffted/", file, sep=""))
   exp_meditation[[i]] <- exp_meditation[[i]][rowSums(exp_meditation[[i]] == "-Inf") == 0, , drop = FALSE]
   exp_meditation[[i]] <- add_loess(exp_meditation[[i]])
+  print(i)
 }
 
 inexp_meditation = list()
@@ -51,6 +56,8 @@ for(i in 1:length(inexp_meditation_files)) {
   file = inexp_meditation_files[i]
   inexp_meditation[[i]] <-  read.csv(paste("ffted/", file, sep=""))
   inexp_meditation[[i]] <- inexp_meditation[[i]][rowSums(inexp_meditation[[i]] == "-Inf") == 0, , drop = FALSE]
+  inexp_meditation[[i]] <- add_loess(inexp_meditation[[i]])
+  print(i)
 }
 
 exp_reference = list()
@@ -58,6 +65,8 @@ for(i in 1:length(exp_reference_files)) {
   file = exp_reference_files[i]
   exp_reference[[i]] <-  read.csv(paste("ffted/", file, sep=""))
   exp_reference[[i]] <- exp_reference[[i]][rowSums(exp_reference[[i]] == "-Inf") == 0, , drop = FALSE]
+  exp_reference[[i]] <- add_loess(exp_reference[[i]])
+  print(i)
 }
 
 inexp_reference = list()
@@ -65,6 +74,8 @@ for(i in 1:length(inexp_reference_files)) {
   file = inexp_reference_files[i]
   inexp_reference[[i]] <-  read.csv(paste("ffted/", file, sep=""))
   inexp_reference[[i]] <- inexp_reference[[i]][rowSums(inexp_reference[[i]] == "-Inf") == 0, , drop = FALSE]
+  inexp_reference[[i]] <- add_loess(inexp_reference[[i]])
+  print(i)
 }
 ```
 
@@ -98,7 +109,6 @@ subset_and_melt <- function(med, exp, wave, electrodes, melt, melt_all){
     }
   }
 
-  #browser()
   data = list()
   for(i in 1:length(df)) {
   data[[i]] <- df[[i]][, grepl(paste('(', wave, ')|(', electrodes, ')|(timestamp)', sep = ""), names(df[[i]]))]
@@ -335,11 +345,7 @@ temp <- es(to_draw$value, h=18, holdout=TRUE, silent=FALSE)
 ```
 
 ```{r}
-to_draw_part <- to_draw[c(1:1000),]
 
-ggplot(aes(y = value, x = timestamps), data = to_draw_part, data_temp$waves == "alpha_absolute_1") +
-  geom_line() +
-  geom_smooth(span = 1, n = 15) 
 ```
 
 ```{r}
@@ -357,11 +363,124 @@ ggplot() +
 
 
 ```{r}
+ggplot() +
+  geom_smooth(aes(y = value, x = timestamps), data = theta_exp_med[theta_exp_med$waves == 'loess_theta_absolute_2',], span = 1, n = 15, color = "blue") +
+  geom_line(aes(y = value, x = timestamps), data = theta_exp_med[theta_exp_med$waves == 'loess_theta_absolute_2',], color = 'red', alpha = 0.2) +
+  geom_line(aes(y = value, x = timestamps), data = theta_exp_med[theta_exp_med$waves == 'theta_absolute_2',], color = 'black', alpha = 0.2)
+```
+```{r}
+curr_data <- theta_exp_med[theta_exp_med$L1 == '1',]
 
-}
+#[theta_exp_med$waves == 'theta_absolute_2' & 
+    
+ggplot(aes(y = value, x = timestamps), data = curr_data) +
+  geom_line(data = curr_data[curr_data$waves == 'theta_absolute_2', ], color = 'red', alpha = 0.7) +
+  geom_line(data = curr_data[curr_data$waves == 'loess_theta_absolute_2',], color = 'black', alpha = 1)
 ```
 
 ```{r}
-test <- add_smooth("test_loess", theta_exp_med, 0.65, 'theta_absolute_1', "1")
+temp <- curr_data[curr_data$waves == 'loess_theta_absolute_2', ]
+loess_ordered <- temp$value
+loess_ordered <- sort(loess_ordered)
+min(loess_ordered)
+barplot(loess_ordered)
+```
+```{r}
+temp$state <- cut(temp$value, quantile(temp$value,(0:5)/5))
+
+ggplot(aes(y = value, x = timestamps), data = curr_data) +
+  geom_line(data = curr_data[curr_data$waves == 'theta_absolute_2', ], color = 'grey', alpha = 0.7) +
+  geom_line(data = curr_data[curr_data$waves == 'loess_theta_absolute_2',], color = 'black', alpha = 1) +
+  geom_line(aes(y = value, x = timestamps, color = state, size = 2),data = temp, alpha = 1) 
+  
+```
+
+
+theta_2, second person
+```{r}
+curr_data <- theta_exp_med[theta_exp_med$L1 == '2',]
+temp <- curr_data[curr_data$waves == 'loess_theta_absolute_2', ]
+temp$state <- cut(temp$value, quantile(temp$value,(0:5)/5))
+
+ggplot(aes(y = value, x = timestamps), data = curr_data) +
+  geom_line(data = curr_data[curr_data$waves == 'theta_absolute_2', ], color = 'grey', alpha = 0.7) +
+  geom_line(data = curr_data[curr_data$waves == 'loess_theta_absolute_2',], color = 'black', alpha = 1) +
+  geom_line(aes(y = value, x = timestamps, color = state, size = 2),data = temp, alpha = 1) 
+```
+
+```{r}
+curr_data <- theta_exp_med[theta_exp_med$L1 == '3',]
+temp <- curr_data[curr_data$waves == 'loess_theta_absolute_2', ]
+temp$state <- cut(temp$value, quantile(temp$value,(0:5)/5))
+
+ggplot(aes(y = value, x = timestamps), data = curr_data) +
+  geom_line(data = curr_data[curr_data$waves == 'theta_absolute_2', ], color = 'grey', alpha = 0.7) +
+  geom_line(data = curr_data[curr_data$waves == 'loess_theta_absolute_2',], color = 'black', alpha = 1) +
+  geom_line(aes(y = value, x = timestamps, color = state, size = 2),data = temp, alpha = 1) 
+```
+
+```{r}
+curr_data <- theta_exp_med[theta_exp_med$L1 == '4',]
+temp <- curr_data[curr_data$waves == 'loess_theta_absolute_2', ]
+temp$state <- cut(temp$value, quantile(temp$value,(0:5)/5))
+
+ggplot(aes(y = value, x = timestamps), data = curr_data) +
+  geom_line(data = curr_data[curr_data$waves == 'theta_absolute_2', ], color = 'grey', alpha = 0.7) +
+  geom_line(data = curr_data[curr_data$waves == 'loess_theta_absolute_2',], color = 'black', alpha = 1) +
+  geom_line(aes(y = value, x = timestamps, color = state, size = 2),data = temp, alpha = 1) 
+```
+
+```{r}
+curr_data <- theta_exp_med[theta_exp_med$L1 == '6',]
+temp <- curr_data[curr_data$waves == 'loess_theta_absolute_2', ]
+temp$state <- cut(temp$value, quantile(temp$value,(0:5)/5))
+
+ggplot(aes(y = value, x = timestamps), data = curr_data) +
+  geom_line(data = curr_data[curr_data$waves == 'theta_absolute_2', ], color = 'grey', alpha = 0.7) +
+  geom_line(data = curr_data[curr_data$waves == 'loess_theta_absolute_2',], color = 'black', alpha = 1) +
+  geom_line(aes(y = value, x = timestamps, color = state, size = 2),data = temp, alpha = 1) 
+```
+```{r}
+curr_data <- theta_exp_med[theta_exp_med$L1 == '7',]
+temp <- curr_data[curr_data$waves == 'loess_theta_absolute_2', ]
+temp$state <- cut(temp$value, quantile(temp$value,(0:5)/5))
+
+ggplot(aes(y = value, x = timestamps), data = curr_data) +
+  geom_line(data = curr_data[curr_data$waves == 'theta_absolute_2', ], color = 'grey', alpha = 0.7) +
+  geom_line(data = curr_data[curr_data$waves == 'loess_theta_absolute_2',], color = 'black', alpha = 1) +
+  geom_line(aes(y = value, x = timestamps, color = state, size = 2),data = temp, alpha = 1) 
+```
+
+```{r}
+curr_data <- theta_exp_med[theta_exp_med$L1 == '8',]
+temp <- curr_data[curr_data$waves == 'loess_theta_absolute_2', ]
+temp$state <- cut(temp$value, quantile(temp$value,(0:5)/5))
+
+ggplot(aes(y = value, x = timestamps), data = curr_data) +
+  geom_line(data = curr_data[curr_data$waves == 'theta_absolute_2', ], color = 'grey', alpha = 0.7) +
+  geom_line(data = curr_data[curr_data$waves == 'loess_theta_absolute_2',], color = 'black', alpha = 1) +
+  geom_line(aes(y = value, x = timestamps, color = state, size = 2),data = temp, alpha = 1) 
+```
+
+```{r}
+curr_data <- alpha_exp_med[theta_exp_med$L1 == '1',]
+temp <- curr_data[curr_data$waves == 'loess_alpha_absolute_2', ]
+temp$state <- cut(temp$value, quantile(temp$value,(0:5)/5))
+
+ggplot(aes(y = value, x = timestamps), data = curr_data) +
+  geom_line(data = curr_data[curr_data$waves == 'alpha_absolute_2', ], color = 'grey', alpha = 0.7) +
+  geom_line(data = curr_data[curr_data$waves == 'loess_alpha_absolute_2',], color = 'black', alpha = 1) +
+  geom_line(aes(y = value, x = timestamps, color = state, size = 2),data = temp, alpha = 1) 
+```
+
+```{r}
+curr_data <- alpha_exp_med[theta_exp_med$L1 == '2',]
+temp <- curr_data[curr_data$waves == 'loess_alpha_absolute_2', ]
+temp$state <- cut(temp$value, quantile(temp$value,(0:5)/5))
+
+ggplot(aes(y = value, x = timestamps), data = curr_data) +
+  geom_line(data = curr_data[curr_data$waves == 'alpha_absolute_2', ], color = 'grey', alpha = 0.7) +
+  geom_line(data = curr_data[curr_data$waves == 'loess_alpha_absolute_2',], color = 'black', alpha = 1) +
+  geom_line(aes(y = value, x = timestamps, color = state, size = 2),data = temp, alpha = 1) 
 ```
 
