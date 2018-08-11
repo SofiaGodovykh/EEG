@@ -15,6 +15,7 @@ library(TTR)
 require(smooth)
 require(greybox)
 require(Mcomp)
+library(RColorBrewer)
 ```
 
 
@@ -474,13 +475,124 @@ ggplot(aes(y = value, x = timestamps), data = curr_data) +
 ```
 
 ```{r}
-curr_data <- alpha_exp_med[theta_exp_med$L1 == '2',]
-temp <- curr_data[curr_data$waves == 'loess_alpha_absolute_2', ]
-temp$state <- cut(temp$value, quantile(temp$value,(0:5)/5))
 
-ggplot(aes(y = value, x = timestamps), data = curr_data) +
-  geom_line(data = curr_data[curr_data$waves == 'alpha_absolute_2', ], color = 'grey', alpha = 0.7) +
-  geom_line(data = curr_data[curr_data$waves == 'loess_alpha_absolute_2',], color = 'black', alpha = 1) +
-  geom_line(aes(y = value, x = timestamps, color = state, size = 2),data = temp, alpha = 1) 
+```
+
+```{r}
+alpha_2_all_exp <- subset_and_melt(TRUE, TRUE, 'alpha', 'All', TRUE, TRUE)
+
+ggplot(aes(x = timestamps, y = value), data = alpha_2_all_exp[alpha_2_all_exp$waves == 'loess_alpha_absolute_2',]) +
+  geom_line(aes(color = L1)) +
+  ggtitle("alpha 2, exp")
+```
+
+```{r}
+alpha_2_all_exp <- subset_and_melt(TRUE, TRUE, 'alpha', 'All', TRUE, TRUE)
+
+ggplot(aes(x = timestamps, y = value), data = alpha_2_all_exp[alpha_2_all_exp$waves == 'loess_alpha_absolute_1',]) +
+  geom_line(aes(color = L1)) +
+  ggtitle("alpha 1, exp")
+```
+
+```{r}
+alpha_2_all_exp <- subset_and_melt(TRUE, TRUE, 'alpha', 'All', TRUE, TRUE)
+
+ggplot(aes(x = timestamps, y = value), data = alpha_2_all_exp[alpha_2_all_exp$waves == 'loess_alpha_absolute_3',]) +
+  geom_line(aes(color = L1)) +
+  ggtitle("alpha 3, exp")
+```
+
+```{r}
+alpha_2_all_exp <- subset_and_melt(TRUE, TRUE, 'alpha', 'All', TRUE, TRUE)
+
+ggplot(aes(x = timestamps, y = value), data = alpha_2_all_exp[alpha_2_all_exp$waves == 'loess_alpha_absolute_4',]) +
+  geom_line(aes(color = L1)) +
+  ggtitle("alpha 4, exp")
+```
+
+```{r}
+alpha_2_all_exp <- subset_and_melt(TRUE, FALSE, 'alpha', 'All', TRUE, TRUE)
+
+ggplot(aes(x = timestamps, y = value), data = alpha_2_all_exp[alpha_2_all_exp$waves == 'loess_alpha_absolute_2',]) +
+  geom_line(aes(color = L1)) +
+  ggtitle("alpha 2, inexp")
+```
+
+```{r}
+ggplot(aes(x = timestamps, y = value), data = alpha_2_all_exp[alpha_2_all_exp$waves == 'loess_alpha_absolute_1',]) +
+  geom_line(aes(color = L1)) +
+  ggtitle("alpha 1, inexp")
+```
+
+```{r}
+ggplot(aes(x = timestamps, y = value), data = alpha_2_all_exp[alpha_2_all_exp$waves == 'loess_alpha_absolute_3',]) +
+  geom_line(aes(color = L1)) +
+  ggtitle("alpha 3, inexp")
+```
+
+```{r}
+ggplot(aes(x = timestamps, y = value), data = alpha_2_all_exp[alpha_2_all_exp$waves == 'loess_alpha_absolute_4',]) +
+  geom_line(aes(color = L1)) +
+  ggtitle("alpha 4, inexp")
+```
+
+```{r}
+temp <- subset_and_melt(TRUE, TRUE, 'theta', 'All', TRUE, TRUE)
+
+ggplot(aes(x = timestamps, y = value), data = temp[temp$waves == 'loess_theta_absolute_1',]) +
+  geom_line(aes(color = L1)) +
+  ggtitle("theta 1, exp")
+```
+
+```{r}
+ggplot(aes(x = timestamps, y = value), data = temp[temp$waves == 'loess_theta_absolute_2',]) +
+  geom_line(aes(color = L1)) +
+  ggtitle("theta 2, exp")
+```
+
+```{r}
+ggplot(aes(x = timestamps, y = value), data = temp[temp$waves == 'loess_theta_absolute_3',]) +
+  geom_line(aes(color = L1)) +
+  ggtitle("theta 3, exp")
+```
+
+```{r}
+ggplot(aes(x = timestamps, y = value), data = temp[temp$waves == 'loess_theta_absolute_4',]) +
+  geom_line(aes(color = L1)) +
+  ggtitle("theta 4, exp")
+```
+
+```{r}
+temp <- subset_and_melt(TRUE, TRUE, 'alpha', 'theta', TRUE, TRUE)
+
+ggplot() +
+  geom_line(aes(x = timestamps, y = value, color = L1), data = temp[temp$waves == 'loess_theta_absolute_1',],  size = 1) +
+  ggtitle("theta 1 and alpha 1, exp") +
+  geom_line(aes(x = timestamps, y = value, color = L1), data = temp[temp$waves == 'loess_alpha_absolute_1',], linetype = 'dotted', size = 1) +
+  scale_color_brewer(palette = "Spectral")
+```
+
+```{r}
+ggplot() +
+  geom_line(aes(x = timestamps, y = value, color = L1), data = temp[temp$waves == 'loess_theta_absolute_2',],  size = 1) +
+  geom_line(aes(x = timestamps, y = value, color = L1), data = temp[temp$waves == 'loess_alpha_absolute_2',], linetype = 'dotted', size = 1) +
+  scale_color_brewer(palette = "Spectral") +
+  ggtitle("theta 2 and alpha 2, exp")
+```
+
+```{r}
+ggplot() +
+  geom_line(aes(x = timestamps, y = value, color = L1), data = temp[temp$waves == 'loess_theta_absolute_3',],  size = 1) +
+  geom_line(aes(x = timestamps, y = value, color = L1), data = temp[temp$waves == 'loess_alpha_absolute_3',], linetype = 'dotted', size = 1) +
+  scale_color_brewer(palette = "Spectral") +
+  ggtitle("theta 3 and alpha 3, exp")
+```
+
+```{r}
+ggplot() +
+  geom_line(aes(x = timestamps, y = value, color = L1), data = temp[temp$waves == 'loess_theta_absolute_4',],  size = 1) +
+  geom_line(aes(x = timestamps, y = value, color = L1), data = temp[temp$waves == 'loess_alpha_absolute_4',], linetype = 'dotted', size = 1) +
+  scale_color_brewer(palette = "Spectral") +
+  ggtitle("theta 4 and alpha 4, exp")
 ```
 
