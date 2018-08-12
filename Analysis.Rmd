@@ -152,6 +152,7 @@ subset_and_melt <- function(med, exp, wave, electrodes, melt, melt_all){
   
   return(data)
 }
+
 ```
 
 testing
@@ -623,7 +624,71 @@ ggplot() +
 ```
 
 ```{r}
-browser()
 alpha_with_averages <- subset_and_melt(TRUE, TRUE, 'alpha', 'all', TRUE, TRUE)
+
+ggplot() +
+  geom_line(aes(x = timestamps, y = value, color = L1), data = alpha_with_averages[alpha_with_averages$waves == 'alpha_absolute_2',],  size = 1) +
+  geom_line(aes(x = timestamps, y = value, color = L1), data = alpha_with_averages[alpha_with_averages$waves == 'loess_alpha_absolute_2',], linetype = 'dotted', size = 1) +
+  geom_line(aes(x = timestamps, y = value, color = L1), data = alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',], linetype = 'dotted', size = 1) +
+  scale_color_brewer(palette = "Spectral") +
+  ggtitle("alpha 2 all together, exp")
+```
+
+```{r}
+ggplot() +
+  geom_line(aes(x = timestamps, y = value, color = L1), data = alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',], size = 1, alpha = 0.5) +
+  scale_color_brewer(palette = "Spectral") +
+  ggtitle("alpha averages")
+```
+```{r}
+ggplot() +
+  geom_line(aes(x = timestamps, y = value, color = L1), data = alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',], size = 1, alpha = 0.2) +
+  scale_color_brewer(palette = "Spectral") +
+  geom_smooth(aes(x = timestamps, y = value, color = L1), data = alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',], size = 1) +
+  ggtitle("alpha averages with smoothing")
+```
+
+
+```{r}
+ggplot() +
+  geom_smooth(aes(x = timestamps, y = value, color = L1), data = alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',], size = 0.5) +
+  scale_color_brewer(palette = "Spectral") +
+  ggtitle("alpha averages with smoothing")
+```
+
+```{r}
+ggplot() +
+  geom_smooth(aes(x = timestamps, y = value, color = L1), data = alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',], size = 0.5) +
+    geom_line(aes(x = timestamps, y = value, color = L1), data = alpha_with_averages[alpha_with_averages$waves == 'loess_alpha_absolute_2',], size = 1, alpha = 1) +
+  scale_color_brewer(palette = "Spectral") +
+  ggtitle("alpha averages with smoothing VS alpha 2 (bold)")
+```
+
+```{r}
+theta_with_averages <- subset_and_melt(TRUE, TRUE, 'theta', 'all', TRUE, TRUE)
+```
+
+```{r}
+ggplot() +
+  geom_smooth(aes(x = timestamps, y = value, color = L1), data = theta_with_averages[theta_with_averages$waves == 'avg_theta',], size = 0.5) +
+  scale_color_brewer(palette = "Spectral") +
+  ggtitle("theta averages with smoothing")
+```
+
+```{r}
+ggplot() +
+  geom_smooth(aes(x = timestamps, y = value, color = L1), data = theta_with_averages[theta_with_averages$waves == 'avg_theta',], size = 0.5) +
+    geom_line(aes(x = timestamps, y = value, color = L1), data = theta_with_averages[theta_with_averages$waves == 'loess_theta_absolute_2',], size = 1, alpha = 1) +
+  scale_color_brewer(palette = "Spectral") +
+  ggtitle("theta averages with smoothing VS theta 2 (bold)")
+```
+
+```{r}
+ggplot() +
+  geom_smooth(aes(x = timestamps, y = value, color = L1), data = theta_with_averages[theta_with_averages$waves == 'avg_theta',], size = 0.5) +
+  geom_smooth(aes(x = timestamps, y = value, color = L1), data = alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',], size = 1) +
+  
+  scale_color_brewer(palette = "Spectral") +
+  ggtitle("theta averages VS alpha averages (bold)")
 ```
 
