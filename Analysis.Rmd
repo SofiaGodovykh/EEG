@@ -36,7 +36,7 @@ add_loess <- function(df){
 ```{r}
 add_average <- function(df, wave){
   name <- paste("avg_", wave, sep = "")
-  temp_df <- df[,names(df) %in% colnames(df)[grepl(wave,colnames(df)) & !grepl("loess",colnames(df))]]
+  temp_df <- df[,names(df) %in% colnames(df)[grepl(wave,colnames(df)) & !grepl("loess",colnames(df)) & !grepl("1",colnames(df)) & !grepl("4",colnames(df))]]
   temp_avg <- rowMeans(temp_df, dims = 1)
   df[, name] <- temp_avg
   return(df)
@@ -694,18 +694,34 @@ ggplot() +
 ```
 
 ```{r}
-split_stages <- function(df, time_interval){
+split_stages <- function(df, time_interval, representative_period, threshold){
   current_time <- 0
+  current_stage <- 1
   df$stages <- rep(0,nrow(df))
-  df$stages[df$timestamps < current_time + time_interval] <- "2"
+  df$stages[df$timestamps < current_time + time_interval] <- current_stage #first 3 minutes
   while(TRUE){
-    
+    if(current_time + time_interval + 1 > max(df$timestamps)){
+      break
+    }
+    repr_df <- df[(df$timestamps < (current_time + time_interval) & df$timestamps > (current_time + time_interval - representative_period)),]
+    new_stage_sign <- next_stage(repr_df, threshold) #defining a new stage level
+    if(new_stage_sign > 0){
+      current_stage <- min(current_stage + 1, 5)
+    }
+    if(new_stage_sign < 0){
+      current_stage <- max(current_stage - 1, 1)
+    }
+    #set a new stage in the df
+    df[(df$timestamps < (current_time + 2 * time_interval) & df$timestamps > (current_time + time_interval)),]$stages <- current_stage
+    current_time <- current_time + time_interval
   }
+  df$stages <- as.factor(df$stages)
+  return(df$stages)
 }
 ```
+
 ```{r}
 next_stage <- function(df, threshold){
-  #print(deriv(df$value, df$timestamps))
   spline <- predict(sm.spline(df$timestamps, df$value), df$timestamps, 1)
   diffs <- spline[2 : length(spline),] - spline[1 : (length(spline) -1),]
   signum <- sum(sign(diffs))
@@ -720,8 +736,41 @@ next_stage <- function(df, threshold){
 
 ```{r}
 temp <- alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',]
+temp <- temp[temp$L1 == '8',]
+res <- split_stages(temp, 3 * 60, 30, 0.01)
+print(unique(res$stages))
+```
+
+```{r}
+temp <- alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',]
 temp <- temp[temp$L1 == '1',]
-temp <- temp[1:1000,]
-next_stage(temp, 0.1)
+res <- split_stages(temp, 3 * 60, 30, 0.01)
+```
+
+```{r}
+add_stages <- function(df, time_interval, representative_period, threshold){
+  df$stages <- rep(0,nrow(df))
+  for(factor in levels(df$L1)){
+    df[df$L1 == factor,]$stages <- split_stages( df[df$L1 == factor,], time_interval, representative_period, threshold)
+  }
+  return(df)
+}
+```
+
+```{r}
+temp <- alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',]
+temp <- add_stages(temp, 3 * 60, 30, 0.001)
+```
+
+```{r}
+alpha_with_averages <- subset_and_melt(TRUE, TRUE, 'alpha', 'all', TRUE, TRUE)
+temp <- alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',]
+alpha_stages <- add_stages(temp, 3 * 60, 30, 0.01)
+
+the_person <- alpha_stages[alpha_stages$L1 == '8',]
+print(unique(the_person$stages))
+
+ggplot() +
+  geom_smooth(aes(y = value, x = timestamps, color = as.factor(stages)), data = the_person, alpha = 0.5)
 ```
 
