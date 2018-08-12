@@ -25,16 +25,23 @@ add_loess <- function(df){
   for(i in names(df)){
     if(grepl('absolute', i) & !grepl('loess', i)){
       name <- paste("loess_", i, sep = "")
-      print(name)
       df[, name] <- loess(df[,i] ~ df$timestamps, data = df, span=0.65)$fitted
-      #loess(value ~ timestamps, data=i, span=0.65)$fitted
-      #loess_df$paste("loess_", i) <- loess(value ~ timestamps, data=i, span=0.65)$fitted
     }
   }
-  #df <- merge(df, loess_df)
   return(df)
 }
 ```
+
+```{r}
+add_average <- function(df, wave){
+  name <- paste("avg_", wave, sep = "")
+  temp_df <- df[,names(df) %in% colnames(df)[grepl(wave,colnames(df)) & !grepl("loess",colnames(df))]]
+  temp_avg <- rowMeans(temp_df, dims = 1)
+  df[, name] <- temp_avg
+  return(df)
+}
+```
+
 
 load data
 ```{r}
@@ -43,13 +50,18 @@ inexp_reference_files = sort(list.files("ffted/",pattern="^0_ffted_ref"))
 exp_meditation_files = sort(list.files("ffted/",pattern="^1_ffted_med"))
 exp_reference_files = sort(list.files("ffted/",pattern="^1_ffted_ref"))
 
+
 exp_meditation = list()
 for(i in 1:length(exp_meditation_files)) {
   file = exp_meditation_files[i]
   exp_meditation[[i]] <- read.csv(paste("ffted/", file, sep=""))
   exp_meditation[[i]] <- exp_meditation[[i]][rowSums(exp_meditation[[i]] == "-Inf") == 0, , drop = FALSE]
+  exp_meditation[[i]] <- add_average(exp_meditation[[i]], "alpha")
+  exp_meditation[[i]] <- add_average(exp_meditation[[i]], "beta")
+  exp_meditation[[i]] <- add_average(exp_meditation[[i]], "gamma")
+  exp_meditation[[i]] <- add_average(exp_meditation[[i]], "delta")
+  exp_meditation[[i]] <- add_average(exp_meditation[[i]], "theta")
   exp_meditation[[i]] <- add_loess(exp_meditation[[i]])
-  print(i)
 }
 
 inexp_meditation = list()
@@ -57,8 +69,12 @@ for(i in 1:length(inexp_meditation_files)) {
   file = inexp_meditation_files[i]
   inexp_meditation[[i]] <-  read.csv(paste("ffted/", file, sep=""))
   inexp_meditation[[i]] <- inexp_meditation[[i]][rowSums(inexp_meditation[[i]] == "-Inf") == 0, , drop = FALSE]
+  inexp_meditation[[i]] <- add_average(inexp_meditation[[i]], "alpha")
+  inexp_meditation[[i]] <- add_average(inexp_meditation[[i]], "beta")
+  inexp_meditation[[i]] <- add_average(inexp_meditation[[i]], "gamma")
+  inexp_meditation[[i]] <- add_average(inexp_meditation[[i]], "delta")
+  inexp_meditation[[i]] <- add_average(inexp_meditation[[i]], "theta")
   inexp_meditation[[i]] <- add_loess(inexp_meditation[[i]])
-  print(i)
 }
 
 exp_reference = list()
@@ -66,8 +82,13 @@ for(i in 1:length(exp_reference_files)) {
   file = exp_reference_files[i]
   exp_reference[[i]] <-  read.csv(paste("ffted/", file, sep=""))
   exp_reference[[i]] <- exp_reference[[i]][rowSums(exp_reference[[i]] == "-Inf") == 0, , drop = FALSE]
+  exp_reference[[i]] <- add_average(exp_reference[[i]], "alpha")
+  exp_reference[[i]] <- add_average(exp_reference[[i]], "beta")
+  exp_reference[[i]] <- add_average(exp_reference[[i]], "gamma")
+  exp_reference[[i]] <- add_average(exp_reference[[i]], "delta")
+  exp_reference[[i]] <- add_average(exp_reference[[i]], "theta")
   exp_reference[[i]] <- add_loess(exp_reference[[i]])
-  print(i)
+
 }
 
 inexp_reference = list()
@@ -75,8 +96,13 @@ for(i in 1:length(inexp_reference_files)) {
   file = inexp_reference_files[i]
   inexp_reference[[i]] <-  read.csv(paste("ffted/", file, sep=""))
   inexp_reference[[i]] <- inexp_reference[[i]][rowSums(inexp_reference[[i]] == "-Inf") == 0, , drop = FALSE]
+  inexp_reference[[i]] <- add_average(inexp_reference[[i]], "alpha")
+  inexp_reference[[i]] <- add_average(inexp_reference[[i]], "beta")
+  inexp_reference[[i]] <- add_average(inexp_reference[[i]], "gamma")
+  inexp_reference[[i]] <- add_average(inexp_reference[[i]], "delta")
+  inexp_reference[[i]] <- add_average(inexp_reference[[i]], "theta")
   inexp_reference[[i]] <- add_loess(inexp_reference[[i]])
-  print(i)
+
 }
 ```
 
@@ -594,5 +620,10 @@ ggplot() +
   geom_line(aes(x = timestamps, y = value, color = L1), data = temp[temp$waves == 'loess_alpha_absolute_4',], linetype = 'dotted', size = 1) +
   scale_color_brewer(palette = "Spectral") +
   ggtitle("theta 4 and alpha 4, exp")
+```
+
+```{r}
+browser()
+alpha_with_averages <- subset_and_melt(TRUE, TRUE, 'alpha', 'all', TRUE, TRUE)
 ```
 
