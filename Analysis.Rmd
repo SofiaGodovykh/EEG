@@ -6,6 +6,7 @@ output: html_notebook
 imports
 ```{r}
 library(tidyr)
+library(pspline)
 library(purrr)
 library(dplyr)
 library(ggplot2)
@@ -690,5 +691,37 @@ ggplot() +
   
   scale_color_brewer(palette = "Spectral") +
   ggtitle("theta averages VS alpha averages (bold)")
+```
+
+```{r}
+split_stages <- function(df, time_interval){
+  current_time <- 0
+  df$stages <- rep(0,nrow(df))
+  df$stages[df$timestamps < current_time + time_interval] <- "2"
+  while(TRUE){
+    
+  }
+}
+```
+```{r}
+next_stage <- function(df, threshold){
+  #print(deriv(df$value, df$timestamps))
+  spline <- predict(sm.spline(df$timestamps, df$value), df$timestamps, 1)
+  diffs <- spline[2 : length(spline),] - spline[1 : (length(spline) -1),]
+  signum <- sum(sign(diffs))
+  if(abs(signum)/length(df) >= threshold){
+    return(sign(signum))
+  }
+  else{
+    return(0)
+  }
+}
+```
+
+```{r}
+temp <- alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',]
+temp <- temp[temp$L1 == '1',]
+temp <- temp[1:1000,]
+next_stage(temp, 0.1)
 ```
 
