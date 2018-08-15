@@ -695,7 +695,7 @@ ggplot() +
 ```
 
 ```{r}
-split_stages <- function(df, time_interval, representative_period, threshold){
+split_stages <- function(df, time_interval, representative_period, lower_threshold, upper_threshold){
   current_time <- 0
   current_stage <- 1
   df$stages <- rep(0,nrow(df))
@@ -705,7 +705,7 @@ split_stages <- function(df, time_interval, representative_period, threshold){
       break
     }
     repr_df <- df[(df$timestamps < (current_time + time_interval) & df$timestamps > (current_time + time_interval - representative_period)),]
-    new_stage_sign <- next_stage(repr_df, threshold) #defining a new stage level
+    new_stage_sign <- next_stage(repr_df, lower_threshold, upper_threshold) #defining a new stage level
     if(new_stage_sign > 0){
       current_stage <- min(current_stage + 1, 5)
     }
@@ -722,61 +722,43 @@ split_stages <- function(df, time_interval, representative_period, threshold){
 ```
 
 ```{r}
-next_stage <- function(df, threshold){
+next_stage <- function(df, lower_threshold, upper_threshold){
   fit <- auto.arima(df$value)
-  forecast <- predict(fit, length(df$value))
+  #browser()
+  forecast <- predict(fit, 20)
   initial_data <- df[(df$value < quantile(df$value, 0.95) & df$value > quantile(df$value, 0.05)), ]$value
   forecast <- forecast$pred
-  forecast <- forecast[forecast < quantile(forecast, 0.95) & forecast > quantile(forecast, 0.05)]
-  #fit <- which(fit < quantile(fit, 0.95) & fit > quantile(fit, 0.05))
-  diff <- sum(forecast) - sum(initial_data) 
-  print(sum(forecast))
-  print(sum(initial_data))
-  print("-------")
-  if(abs(diff) > threshold){
-    if(diff > 0){
-      return(1)
-    }
-    else{
-      return(-1)
-    }
+  #print(forecast)
+  #forecast <- forecast[forecast < quantile(forecast, 0.95) & forecast > quantile(forecast, 0.05)]
+  diff <- sum(forecast)/length(forecast) - sum(initial_data)/length(initial_data)
+  print(diff)
+  if(diff > upper_threshold){
+    return(1)
+  }
+  if(diff < lower_threshold){
+    return(-1)
   }
   return(0)
 }
 ```
 
-```{r}
-temp <- alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',]
-temp <- temp[temp$L1 == '8',]
-res <- split_stages(temp, 3 * 60, 30, 0.01)
-print(unique(res))
-```
+
 
 ```{r}
-temp <- alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',]
-temp <- temp[temp$L1 == '1',]
-res <- split_stages(temp, 3 * 60, 30, 0.01)
-```
-
-```{r}
-add_stages <- function(df, time_interval, representative_period, threshold){
+add_stages <- function(df, time_interval, representative_period, lower_threshold, upper_threshold){
   df$stages <- rep(0,nrow(df))
   for(factor in levels(df$L1)){
-    df[df$L1 == factor,]$stages <- split_stages( df[df$L1 == factor,], time_interval, representative_period, threshold)
+    df[df$L1 == factor,]$stages <- split_stages( df[df$L1 == factor,], time_interval, representative_period, lower_threshold, upper_threshold)
   }
   return(df)
 }
 ```
 
-```{r}
-temp <- alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',]
-temp <- add_stages(temp, 3 * 60, 30, 0.001)
-```
 
 ```{r}
 alpha_with_averages <- subset_and_melt(TRUE, TRUE, 'alpha', 'all', TRUE, TRUE)
 temp <- alpha_with_averages[alpha_with_averages$waves == 'avg_alpha',]
-alpha_stages <- add_stages(temp, 3 * 60, 30, 5)
+alpha_stages <- add_stages(temp, 3 * 60, 30, -0.04, -0.01)
 
 the_person <- alpha_stages[alpha_stages$L1 == '1',]
 print(unique(the_person$stages))
@@ -860,3 +842,73 @@ ggplot() +
   scale_color_brewer(palette = "Blues")
 ```
 
+```{r}
+#d<-d[!(d$A=="B" & d$E==0),]
+alpha_with_averages <- subset_and_melt(TRUE, FALSE, 'alpha', 'all', TRUE, TRUE)
+
+temp <- alpha_with_averages[(alpha_with_averages$waves == 'avg_alpha' & alpha_with_averages$L1 != "4"),]
+alpha_stages <- add_stages(temp, 3 * 60, 30, -0.04, -0.01)
+
+the_person <- alpha_stages[alpha_stages$L1 == '1',]
+print(unique(the_person$stages))
+```
+```{r}
+the_person <- alpha_stages[alpha_stages$L1 == '1',]
+
+ggplot() +
+  geom_line(aes(y = value, x = timestamps, color = as.factor(stages)), data = the_person, alpha = 1) +
+  geom_smooth(aes(y = value, x = timestamps), data = the_person, color = "black") +
+  scale_x_continuous(breaks = seq(0, 1000, by = 180)) +
+  scale_color_brewer(palette = "Blues")
+```
+```{r}
+the_person <- alpha_stages[alpha_stages$L1 == '2',]
+
+ggplot() +
+  geom_line(aes(y = value, x = timestamps, color = as.factor(stages)), data = the_person, alpha = 1) +
+  geom_smooth(aes(y = value, x = timestamps), data = the_person, color = "black") +
+  scale_x_continuous(breaks = seq(0, 1000, by = 180)) +
+  scale_color_brewer(palette = "Blues")
+```
+
+
+```{r}
+the_person <- alpha_stages[alpha_stages$L1 == '3',]
+
+ggplot() +
+  geom_line(aes(y = value, x = timestamps, color = as.factor(stages)), data = the_person, alpha = 1) +
+  geom_smooth(aes(y = value, x = timestamps), data = the_person, color = "black") +
+  scale_x_continuous(breaks = seq(0, 1000, by = 180)) +
+  scale_color_brewer(palette = "Blues")
+```
+
+```{r}
+the_person <- alpha_stages[alpha_stages$L1 == '5',]
+
+ggplot() +
+  geom_line(aes(y = value, x = timestamps, color = as.factor(stages)), data = the_person, alpha = 1) +
+  geom_smooth(aes(y = value, x = timestamps), data = the_person, color = "black") +
+  scale_x_continuous(breaks = seq(0, 1000, by = 180)) +
+  scale_color_brewer(palette = "Blues")
+```
+
+```{r}
+the_person <- alpha_stages[alpha_stages$L1 == '6',]
+
+ggplot() +
+  geom_line(aes(y = value, x = timestamps, color = as.factor(stages)), data = the_person, alpha = 1) +
+  geom_smooth(aes(y = value, x = timestamps), data = the_person, color = "black") +
+  scale_x_continuous(breaks = seq(0, 1000, by = 180)) +
+  scale_color_brewer(palette = "Blues")
+
+```
+
+```{r}
+the_person <- alpha_stages[alpha_stages$L1 == '7',]
+
+ggplot() +
+  geom_line(aes(y = value, x = timestamps, color = as.factor(stages)), data = the_person, alpha = 1) +
+  geom_smooth(aes(y = value, x = timestamps), data = the_person, color = "black") +
+  scale_x_continuous(breaks = seq(0, 1000, by = 180)) +
+  scale_color_brewer(palette = "Blues")
+```
